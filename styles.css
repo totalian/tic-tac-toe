@@ -1,0 +1,29 @@
+h1 {
+    text-align: center;
+}
+
+.game-board {
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    grid-template-rows: repeat(3, 1fr);
+    width: 600px;
+    height: 600px;
+}
+
+.grid-column {
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+}
+
+.grid-row {
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.grid-piece {
+    text-align: center;
+    
+    font-family: 'Patrick Hand', cursive;
+    font-size: 150px;
+}
