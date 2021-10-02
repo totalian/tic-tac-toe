@@ -17,6 +17,10 @@ const gameBoard = (() => {
             for(let j = 0; j < 3; j++){
                 let gridPiece = document.createElement('div')
 
+                //add identifiers to data-attributes
+                gridPiece.dataset.row = i
+                gridPiece.dataset.column = j
+
                 //add styling
                 gridPiece.classList.add('grid-piece')
                 gridPiece.textContent = gameState[i][j]
@@ -28,6 +32,13 @@ const gameBoard = (() => {
             }
         }
     }
+
+    //Bind DOM events
+    gameBoard.addEventListener('click', e => {
+        let row = e.target.dataset.row
+        let column = e.target.dataset.column
+        updateGameState(row,column,"x")
+    })
 
     const updateGameState = (row,column,value) => {
         if (gameState[row][column]) {
