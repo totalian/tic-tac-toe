@@ -79,12 +79,25 @@ const createPlayersForm = (() => {
     const playerOneNameInput = playerForm.querySelector('#player-1-name')
     const playerOneValueOptions = playerForm.querySelectorAll('.player-one-value-options input')
     const playerTwoNameInput = playerForm.querySelector('#player-2-name')
+    const playerTwoNameInputLabel = playerForm.querySelector('#player-2-name-label')
     const playerTwoOpponentTypes = playerForm.querySelectorAll('.opponents input')
 
     //bind DOM
     submitBtn.addEventListener('click',() => {
         makeAllPlayers()
         clearAndHideForm()
+    })
+
+    Array.from(playerTwoOpponentTypes).forEach(input => {
+        input.addEventListener('click',e => {
+            if(e.target.value == "computer"){
+                playerTwoNameInput.classList.add('hidden')
+                playerTwoNameInputLabel.classList.add('hidden')
+            } else {
+                playerTwoNameInput.classList.remove('hidden')
+                playerTwoNameInputLabel.classList.add('hidden')
+            }
+        })
     })
 
 
