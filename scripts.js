@@ -1,6 +1,8 @@
 const gameBoard = (() => {
 
-    let gameState = [["","x",""],["","",""],["","",""]]
+    const gameState = [["","",""],["","",""],["","",""]]
+
+    const getGameState = () => gameState
 
     //Cache DOM Elements
     let gameBoard = document.querySelector('.game-board')
@@ -37,9 +39,14 @@ const gameBoard = (() => {
     gameBoard.addEventListener('click', e => {
         let row = e.target.dataset.row
         let column = e.target.dataset.column
-        // change this later
-        let value = "x"
-        updateGameState(row,column,value)
+        
+        // prevent play during game over
+        if(game.getState() == 1){
+            let value = game.getCurrentPlayer().value
+            updateGameState(row,column,value)
+            game.checkWin()
+            game.playerSwitch()
+        }
     })
 
     const updateGameState = (row,column,value) => {
@@ -53,26 +60,40 @@ const gameBoard = (() => {
 
     render()
 
-    return {updateGameState}
+    return {getGameState}
 
 })()
 
-// const playerMaker = (name, value) => {
-//     return {name, value}
-// }
 
 const createPlayersForm = (() => {
+
+    const players = []
+
+    const getPlayers = () => players
 
     //Cache DOM
     const modal = document.querySelector('.modal')
     const playerForm = document.querySelector('.modal-content')
     const playerFormInputs = playerForm.querySelectorAll('input')
     const submitBtn = playerForm.querySelector('#submit-btn')
+    const playerOneNameInput = playerForm.querySelector('#player-1-name')
+    const playerOneValueOptions = playerForm.querySelectorAll('.player-one-value-options input')
+    const playerTwoNameInput = playerForm.querySelector('#player-2-name')
+    const playerTwoOpponentTypes = playerForm.querySelectorAll('.opponents input')
+
+    //bind DOM
+    submitBtn.addEventListener('click',() => {
+        makeAllPlayers()
+        clearAndHideForm()
+    })
+
 
     //make a player
-    const playerMaker = (name,value) => {name, value}
+    const playerMaker = (name,value) => {
+        return {name,value}
+    }
 
-
+    //clear and hide form function
     const clearAndHideForm = () =>  {playerFormInputs.forEach(input => {
             if(input.type == "radio"){input.checked = false} else {
                 input.value = ''
@@ -81,11 +102,96 @@ const createPlayersForm = (() => {
         modal.style.display = "none"
     }
 
-    return {clearAndHideForm}
+    // create players from form
+    const makeAllPlayers = () => {
+        let playerOneName = playerOneNameInput.value
+
+        let playerOneValue
+        Array.from(playerOneValueOptions).forEach(input => {
+            if(input.checked){
+                playerOneValue = input.value
+            }
+        })
+
+        let playerOne = playerMaker(playerOneName,playerOneValue)
+        players.push(playerOne)
+
+        let opponentChoice
+        Array.from(playerTwoOpponentTypes).forEach(input => {
+            if(input.checked){
+                opponentChoice = input.value
+            }
+        })
+
+        if(opponentChoice == "human"){
+            let opponentName = playerTwoNameInput.value
+            let opponentValue = playerOneValue == "X" ? "O" : "X"
+            let opponent = playerMaker(opponentName,opponentValue)
+            players.push(opponent)
+        } else {
+            let opponentName = computer.name
+            let opponentValue = playerOneValue == "X" ? "O" : "X"
+            let opponent = playerMaker(opponentName,opponentValue)
+            players.push(opponent)
+        }
+
+    }
+
+    return {getPlayers}
 
 })()
 
-const game = () => {
+const game = (() => {
 
-    let players = []
+    // State: 1 = live; 0 = game over
+    let state = 1
+
+    let players = createPlayersForm.getPlayers()
+    let gameState = gameBoard.getGameState()
+
+    const getCurrentPlayer = () => players[0]
+
+    const getState = () => state
+
+    const playerSwitch = () => {
+        let currentPlayer = players[0]
+        players[0] = players[1]
+        players[1] = currentPlayer
+    }
+
+    const checkWin = () => {
+        let winner
+        for(let row = 0; row < 3; row++){
+            if(gameState[row][0]){
+                if(gameState[row][0] == gameState[row][1] && gameState[row][0] == gameState[row][2]){
+                state = 0
+                winner = players[0]
+                }
+            }
+        }
+        for(let column = 0; column < 3; column++){
+            if(gameState[0][column]){
+                if(gameState[0][column] == gameState[1][column] && gameState[0][column] ==  gameState[2][column]){
+                state = 0
+                winner = players[0]
+                }
+            }
+        }
+        if(gameState[1][1]){
+            if((gameState[0][0] == gameState[1][1] && gameState[0][0]  ==  gameState[2][2]) || (gameState[2][0] == gameState[1][1] && gameState[2][0] ==  gameState[0][2])){
+                state = 0
+                winner = players[0]
+            }
+        }
+        if(winner){return winner}
+    }
+
+    return {getCurrentPlayer, playerSwitch, checkWin, getState}
+
+})()
+
+const computer = () => {
+    let name = "Computer"
+    
+    return {name}
 }
