@@ -37,7 +37,9 @@ const gameBoard = (() => {
     gameBoard.addEventListener('click', e => {
         let row = e.target.dataset.row
         let column = e.target.dataset.column
-        updateGameState(row,column,"x")
+        // change this later
+        let value = "x"
+        updateGameState(row,column,value)
     })
 
     const updateGameState = (row,column,value) => {
@@ -54,3 +56,36 @@ const gameBoard = (() => {
     return {updateGameState}
 
 })()
+
+// const playerMaker = (name, value) => {
+//     return {name, value}
+// }
+
+const createPlayersForm = (() => {
+
+    //Cache DOM
+    const modal = document.querySelector('.modal')
+    const playerForm = document.querySelector('.modal-content')
+    const playerFormInputs = playerForm.querySelectorAll('input')
+    const submitBtn = playerForm.querySelector('#submit-btn')
+
+    //make a player
+    const playerMaker = (name,value) => {name, value}
+
+
+    const clearAndHideForm = () =>  {playerFormInputs.forEach(input => {
+            if(input.type == "radio"){input.checked = false} else {
+                input.value = ''
+            }
+        })
+        modal.style.display = "none"
+    }
+
+    return {clearAndHideForm}
+
+})()
+
+const game = () => {
+
+    let players = []
+}

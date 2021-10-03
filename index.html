@@ -13,8 +13,43 @@
 <body>
     <h1>Tic Tac Toe</h1>
 
-    <div class=game-board>
+    <div class="game-board">
 
+    </div>
+
+    <div class="modal">
+        <div class="modal-content">
+            <div>
+                <label for="player-1-name">Player 1 name</label>
+                <input type="text" placeholder="Mazin" id="player-1-name">
+            </div>
+
+            <fieldset>
+                <legend>Player 1 Selection</legend>
+                <input type="radio" id="player-value-x" name="player-value">
+                <label for="player-value-x">X</label>
+                <input type="radio" id="player-value-o" name="player-value">
+                <label for="player-value-o">O</label>
+            </fieldset>
+
+            <fieldset>
+                <legend>Choose Your Oponent</legend>
+                <input type="radio" id="human" name="opponent-choice" checked=true>
+                <label for="human">Human</label>
+                <input type="radio" id="computer" name="opponent-choice">
+                <label for="computer">Computer</label>
+            </fieldset>
+
+            <div>           
+                <label for="player-2-name">Player 2 name</label>
+                <input type="text" placeholder="Zeki" id="player-2-name">
+            </div>
+
+            <div>
+                <button id="submit-btn">Submit</button>
+            </div>
+
+        </div>
     </div>
     
     <script src="scripts.js"></script>
