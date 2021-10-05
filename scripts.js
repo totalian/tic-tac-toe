@@ -37,18 +37,47 @@ const gameBoard = (() => {
 
     //Bind DOM events
     gameBoard.addEventListener('click', e => {
+
+        // prevent player from playing when its computer move
+        if(game.getCurrentPlayer().name == "computer"){return}
+
+        // prevent player from playing when game is over
+        if(game.getState() == 0){return}
+
+        // player move
         let row = e.target.dataset.row
         let column = e.target.dataset.column
+        let value = game.getCurrentPlayer().value
+        updateGameState(row,column,value)
         
-        // prevent play during game over
-        if(game.getState() == 1){
-            let value = game.getCurrentPlayer().value
-            updateGameState(row,column,value)
-            game.checkWin()
-            game.playerSwitch()
-        }
+        // check if game over then switch player
+        game.checkWin()
+        game.playerSwitch()
+
+        // computer move
+        computerMove()
+
     })
 
+    // Computer move
+    const computerMove = () => {
+
+        // prevent computer from playing if its game over
+        if(game.getState() == 0){return}
+
+        if(game.getCurrentPlayer().name == "computer"){
+            setTimeout(() => {
+                let row = computer().playMove().row
+                let column = computer().playMove().column
+                let value = game.getCurrentPlayer().value
+                updateGameState(row,column,value)
+                game.checkWin()
+                game.playerSwitch()
+            }, 1500);
+        }
+    }
+
+    // function to update the array holding all the values with a specific value
     const updateGameState = (row,column,value) => {
         if (gameState[row][column]) {
             return
@@ -88,6 +117,7 @@ const createPlayersForm = (() => {
         clearAndHideForm()
     })
 
+    // hide the player 2 name input form if selecting computer
     Array.from(playerTwoOpponentTypes).forEach(input => {
         input.addEventListener('click',e => {
             if(e.target.value == "computer"){
@@ -166,12 +196,14 @@ const game = (() => {
 
     const getState = () => state
 
+    // change current player
     const playerSwitch = () => {
         let currentPlayer = players[0]
         players[0] = players[1]
         players[1] = currentPlayer
     }
 
+    // check if someone has won the game
     const checkWin = () => {
         let winner
         for(let row = 0; row < 3; row++){
@@ -206,5 +238,29 @@ const game = (() => {
 const computer = () => {
     let name = "Computer"
     
-    return {name}
+    let gameState = gameBoard.getGameState()
+
+    // function to get available moves
+    const getAvailableMoves = () => {
+        let availableMoves = []
+        for(let row = 0; row < 3; row++){
+            for(let column = 0; column < 3; column++){
+                if(gameState[row][column] == ""){
+                    availableMoves.push({row,column})
+                }
+            }
+        }
+        return availableMoves
+    }
+
+    const playMove = () => {
+        let availableMoves = getAvailableMoves()
+
+        // pick a random available move
+        let randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)]
+        return randomMove
+    }
+
+
+    return {name,playMove}
 }
