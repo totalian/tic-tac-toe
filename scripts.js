@@ -39,7 +39,7 @@ const gameBoard = (() => {
     gameBoard.addEventListener('click', e => {
 
         // prevent player from playing when its computer move
-        if(game.getCurrentPlayer().name == "computer"){return}
+        if(game.getCurrentPlayer().name == computer.name){return}
 
         // prevent player from playing when game is over
         if(game.getState() == 0){return}
@@ -67,8 +67,8 @@ const gameBoard = (() => {
 
         if(game.getCurrentPlayer().name == "computer"){
             setTimeout(() => {
-                let row = computer().playMove().row
-                let column = computer().playMove().column
+                let row = computer.playMove().row
+                let column = computer.playMove().column
                 let value = game.getCurrentPlayer().value
                 updateGameState(row,column,value)
                 game.checkWin()
@@ -235,10 +235,46 @@ const game = (() => {
 
 })()
 
-const computer = () => {
+const computer = (() => {
     let name = "Computer"
-    
     let gameState = gameBoard.getGameState()
+
+    // horribly written function to get computer value ("O" or "X")
+    const getMyValue = () => {
+        return createPlayersForm.getPlayers().filter(player => {
+            return player.name == name
+        })[0].value
+    }
+
+    // get all moves computer has played
+    const getComputerMoves = () => {
+        let computerMoves = []
+        for(let row = 0; row < 3; row++){
+            for(let column = 0; column < 3; column++){
+                if(gameState[row][column] == getMyValue()){
+                    computerMoves.push({row,column})
+                }
+            }
+        }
+        return computerMoves
+    }
+
+    const getHumanValue = () =>  getMyValue() == "X" ? "O" : "X"
+
+    // get all moves human has played
+    const getHumanMoves = () => {
+        let humanMoves = []
+        for(let row = 0; row < 3; row++){
+            for(let column = 0; column < 3; column++){
+                if(gameState[row][column] == getHumanValue()){
+                    humanMoves.push({row,column})
+                }
+            }
+        }
+        return humanMoves
+    }
+
+    let moveNumber = 0
 
     // function to get available moves
     const getAvailableMoves = () => {
@@ -256,11 +292,49 @@ const computer = () => {
     const playMove = () => {
         let availableMoves = getAvailableMoves()
 
-        // pick a random available move
-        let randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)]
-        return randomMove
+        // helper function to get random value from an array
+        const randomArrValue = (arr) => arr[Math.floor(Math.random() * arr.length)]
+
+        // pick a corner helper function
+        const pickCorner = () => {
+            let corners = availableMoves.filter(move => {
+                return (move.row == 0 && move.column == 0) ||
+                (move.row == 2 && move.column == 0) ||
+                (move.row == 0 && move.column == 2) ||
+                (move.row == 2 && move.column == 2)
+            })
+            let randomCorner = randomArrValue(corners)
+            return randomCorner
+        }
+
+        // pick an edge helper function
+        const pickEdge = () => {
+            let edges = availableMoves.filter(move => {
+                return (move.row == 0 && move.column == 1) ||
+                (move.row == 1 && move.column == 0) ||
+                (move.row == 1 && move.column == 2) ||
+                (move.row == 2 && move.column == 1)
+            })
+            let randomEdge = randomArrValue(edges)
+            return randomEdge
+        }
+
+        // first move
+        const pickFirstMove = () => {
+            let humanFirstMove = getHumanMoves()[0]
+            // if human picked center then pick a corner
+            if(humanFirstMove.row == 1 && humanFirstMove.column == 1){
+                return pickCorner()
+            } else {
+                return {"row": 1, "corner": 1}
+            }
+        }
+
+        
+
+        moveNumber++
     }
 
 
     return {name,playMove}
-}
+})()
