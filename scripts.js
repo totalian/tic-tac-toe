@@ -1,6 +1,6 @@
 const gameBoard = (() => {
 
-    const gameState = [["X","X",""],["","O",""],["O","",""]]
+    const gameState = [["","",""],["","",""],["","",""]]
 
     const getGameState = () => gameState
 
@@ -61,14 +61,20 @@ const gameBoard = (() => {
 
     // Computer move
     const computerMove = () => {
+        if(computer.moveNumber == 5){
+            console.log("its a draw, well played")
+            return
+        }
 
         // prevent computer from playing if its game over
         if(game.getState() == 0){return}
 
-        if(game.getCurrentPlayer().name == "computer"){
+        if(game.getCurrentPlayer().name == "Computer"){
             setTimeout(() => {
-                let row = computer.playMove().row
-                let column = computer.playMove().column
+                let computerMove = computer.playMove()
+                console.log(computerMove)
+                let row = computerMove.row
+                let column = computerMove.column
                 let value = game.getCurrentPlayer().value
                 updateGameState(row,column,value)
                 game.checkWin()
@@ -274,7 +280,7 @@ const computer = (() => {
         return humanMoves
     }
 
-    let moveNumber = 0
+    let moveNumber = 1
 
     // function to get available moves
     const getAvailableMoves = () => {
@@ -326,13 +332,17 @@ const computer = (() => {
             if(humanFirstMove.row == 1 && humanFirstMove.column == 1){
                 return pickCorner()
             } else {
-                return {"row": 1, "corner": 1}
+                return {"row": 1, "column": 1}
             }
         }
 
         // simulate a move
         const simulateMove = (move,value) => {
-            let simulatedState = gameState.slice(0)
+            let simulatedState = []
+            gameState.forEach(arr => {
+                let clone = [...arr]
+                simulatedState.push(clone)
+            })
             simulatedState[move.row][move.column] = value
             return simulatedState
         }
@@ -363,22 +373,83 @@ const computer = (() => {
         }
 
         // see if there is a winning move
-        const getWinningMoves = () => {
-            let moveValue = getMyValue()
+        const getWinningMoves = (moveValue) => {
             let winningMoves = []
             availableMoves.forEach(potentialMove => {
                 let simulatedBoard = simulateMove(potentialMove,moveValue)
-                if(checkWhoWon(simulatedBoard)){
+                if(checkWhoWon(simulatedBoard) == moveValue){
                     winningMoves.push(potentialMove)
                 }
             })
             return winningMoves
         }
 
-        moveNumber++
-        return {getWinningMoves,getMyValue,simulateMove}
+        // get a winning move if available
+        const tryAndWin = () => {
+            let myValue = getMyValue()
+            let winningMoves = getWinningMoves(myValue)
+            if(winningMoves.length > 0){
+                return winningMoves[0]
+            }
+        }
+
+        // block human from winning
+        const tryAndBlock = () => {
+            let humanValue = getHumanValue()
+            let winningMoves = getWinningMoves(humanValue)
+            if(winningMoves.length > 0){
+                return winningMoves[0]
+            }
+        }
+
+        const randmonMove = () => {
+            return randomArrValue(availableMoves)
+        }
+
+        // check if human has played opposing corners
+        const checkOppositeCorners = () => {
+            let humanMoves = getHumanMoves().sort()
+            if(humanMoves.length > 2){return}
+            let corner1 = {"row":0,"column":0}
+            let corner2 = {"row":0,"column":2}
+            let corner3 = {"row":2,"column":0}
+            let corner4 = {"row":2,"column":2}
+            let cornerGroup1 = [corner1,corner4].sort()
+            let cornerGroup2 = [corner2,corner3].sort()
+            if(JSON.stringify(humanMoves) == JSON.stringify(cornerGroup1) || JSON.stringify(humanMoves) == JSON.stringify(cornerGroup2)){
+                return true
+            } else return false
+        }
+
+        // actual move
+        const moveToPlay = () => {
+            if(moveNumber == 1){
+                console.log('playing first move')
+                moveNumber++
+                return pickFirstMove()
+            } else if (moveNumber == 2 && checkOppositeCorners()){
+                console.log('playing opppsing corner because you picked opposing corners')
+                moveNumber++
+                return pickEdge()
+            } else if (tryAndWin()){
+                console.log('gonna try and win')
+                moveNumber++
+                return tryAndWin()
+            } else if (tryAndBlock()){
+                console.log('ill stop you')
+                moveNumber++
+                return tryAndBlock()
+            } else {
+                console.log('meh ill try anything')
+                moveNumber++
+                return  randmonMove()}
+        }
+
+        console.log(moveNumber)
+
+        return moveToPlay()
     }
 
 
-    return {name,playMove,getAvailableMoves}
+    return {name,playMove,moveNumber}
 })()
