@@ -1,6 +1,6 @@
 const gameBoard = (() => {
 
-    const gameState = [["","",""],["","",""],["","",""]]
+    const gameState = [["X","X",""],["","O",""],["O","",""]]
 
     const getGameState = () => gameState
 
@@ -330,11 +330,55 @@ const computer = (() => {
             }
         }
 
-        
+        // simulate a move
+        const simulateMove = (move,value) => {
+            let simulatedState = gameState.slice(0)
+            simulatedState[move.row][move.column] = value
+            return simulatedState
+        }
+
+        // check which value has won a game
+        const checkWhoWon = board => {
+            let winner
+            for(let row = 0; row < 3; row++){
+                if(board[row][0]){
+                    if(board[row][0] == board[row][1] && board[row][0] == board[row][2]){
+                    winner = board[row][0] 
+                    }
+                }
+            }
+            for(let column = 0; column < 3; column++){
+                if(board[0][column]){
+                    if(board[0][column] == board[1][column] && board[0][column] ==  board[2][column]){
+                    winner = board[0][column]
+                    }
+                }
+            }
+            if(board[1][1]){
+                if((board[0][0] == board[1][1] && board[0][0]  ==  board[2][2]) || (board[2][0] == board[1][1] && board[2][0] ==  board[0][2])){
+                    winner = board[1][1]
+                }
+            }
+            if(winner){return winner}
+        }
+
+        // see if there is a winning move
+        const getWinningMoves = () => {
+            let moveValue = getMyValue()
+            let winningMoves = []
+            availableMoves.forEach(potentialMove => {
+                let simulatedBoard = simulateMove(potentialMove,moveValue)
+                if(checkWhoWon(simulatedBoard)){
+                    winningMoves.push(potentialMove)
+                }
+            })
+            return winningMoves
+        }
 
         moveNumber++
+        return {getWinningMoves,getMyValue,simulateMove}
     }
 
 
-    return {name,playMove}
+    return {name,playMove,getAvailableMoves}
 })()
